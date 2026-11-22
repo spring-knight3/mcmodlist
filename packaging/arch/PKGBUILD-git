@@ -1,0 +1,75 @@
+# Maintainer: spring <spring@localhost>
+pkgname=mcmodlist-git
+_pkgname=mcmodlist
+pkgver=0.1.0.r0.g0000000
+pkgrel=1
+pkgdesc="Inspect Minecraft instances and list their mods (CLI + Qt 6 GUI) - git build"
+arch=('x86_64' 'aarch64')
+url="https://github.com/spring-knight3/mcmodlist"
+license=('GPL-3.0-only')
+depends=('glibc' 'qt6-base')
+makedepends=('git' 'go' 'gcc' 'cmake' 'qt6-base' 'ninja')
+conflicts=('mcmodlist' 'mcmodlist-gui')
+provides=('mcmodlist' 'mcmodlist-gui')
+source=("git+https://github.com/spring-knight3/mcmodlist.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$_pkgname"
+    git describe --tags --long 2>/dev/null | sed 's/^v//; s/-/./g' ||
+        printf '0.1.0.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+    cd "$_pkgname"
+    export GOFLAGS="-modcacherw"
+    go mod download -x
+}
+
+build() {
+    cd "$_pkgname"
+
+    CGO_ENABLED=1 \
+    CGO_CPPFLAGS="${CPPFLAGS}" \
+    CGO_CFLAGS="${CFLAGS}" \
+    CGO_CXXFLAGS="${CXXFLAGS}" \
+    CGO_LDFLAGS="${LDFLAGS}" \
+    GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw" \
+        go build -ldflags "-linkmode external -extldflags \"${LDFLAGS}\" -X mcmodlist/cli.Version=${pkgver}" \
+        -o mcmodlist ./cmd/mcmodlist
+
+    CGO_ENABLED=1 \
+    CGO_CPPFLAGS="${CPPFLAGS}" \
+    CGO_CFLAGS="${CFLAGS}" \
+    CGO_CXXFLAGS="${CXXFLAGS}" \
+    CGO_LDFLAGS="${LDFLAGS}" \
+    GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw" \
+        go build -ldflags "-linkmode external -extldflags \"${LDFLAGS}\" -X mcmodlist/engine.EngineVersion=${pkgver}" \
+        -o mcmodlist-engine ./cmd/mcmodlist-engine
+
+    cmake -S qtgui -B build/qtgui \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -GNinja
+    cmake --build build/qtgui -j"$(nproc)"
+}
+
+check() {
+    cd "$_pkgname"
+    go test ./core/... ./cli/...
+}
+
+package() {
+    cd "$_pkgname"
+    install -Dm755 mcmodlist "$pkgdir/usr/bin/mcmodlist"
+    install -Dm755 build/qtgui/mcmodlist-gui "$pkgdir/usr/bin/mcmodlist-gui"
+    install -Dm755 mcmodlist-engine "$pkgdir/usr/bin/mcmodlist-engine"
+
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 docs/PROTOCOL.md "$pkgdir/usr/share/doc/$pkgname/PROTOCOL.md"
+
+    ./mcmodlist completion bash >"$pkgdir/usr/share/bash-completion/completions/mcmodlist"
+    ./mcmodlist completion zsh >"$pkgdir/usr/share/zsh/site-functions/_mcmodlist"
+    ./mcmodlist completion fish >"$pkgdir/usr/share/fish/vendor_completions.d/mcmodlist.fish"
+}

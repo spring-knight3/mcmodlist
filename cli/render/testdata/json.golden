@@ -1,0 +1,79 @@
+{
+  "tool": {
+    "name": "mcmodlist",
+    "version": "test"
+  },
+  "instance": {
+    "name": "Test Instance",
+    "path": "/tmp/test-instance",
+    "launcher": "prism",
+    "minecraft": "1.20.1",
+    "loader": "fabric",
+    "loaderVersion": "0.15.0"
+  },
+  "counts": {
+    "fabric": 1,
+    "quilt": 0,
+    "forge": 0,
+    "neoforge": 0,
+    "connector": 1,
+    "total": 4,
+    "disabled": 1,
+    "unrecognised": 1
+  },
+  "mods": [
+    {
+      "name": "Fabric Mod",
+      "id": "fabric-mod",
+      "version": "1.0.0",
+      "authors": [
+        "Alice",
+        "Bob"
+      ],
+      "jar": "fabric.jar",
+      "loader": "fabric",
+      "side": "",
+      "status": "enabled"
+    },
+    {
+      "name": "Connector Forge",
+      "id": "forge-mod",
+      "version": "2.0.0",
+      "authors": [
+        "Carol"
+      ],
+      "jar": "forge.jar",
+      "loader": "fabric/connector",
+      "side": "",
+      "status": "enabled"
+    },
+    {
+      "name": "Old Forge",
+      "id": "old-forge",
+      "version": "0.1.0",
+      "authors": [],
+      "jar": "old.jar.disabled",
+      "loader": "forge",
+      "side": "",
+      "status": "disabled"
+    },
+    {
+      "name": "mystery.jar",
+      "id": "",
+      "version": "unknown",
+      "authors": [],
+      "jar": "mystery.jar",
+      "loader": "",
+      "side": "",
+      "status": "enabled"
+    }
+  ],
+  "issues": [],
+  "warnings": [
+    {
+      "type": "corrupt",
+      "mod": "mystery.jar",
+      "message": "cannot read jar"
+    }
+  ]
+}

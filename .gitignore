@@ -1,0 +1,25 @@
+# Build output
+/build/
+*.o
+*.a
+
+# Go
+/vendor/
+
+# Qt / CMake
+build/qtgui/
+.qt/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Packages
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.pkg.tar.gz
+
+# Editor / OS
+.DS_Store
+*~
+*.swp

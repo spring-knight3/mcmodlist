@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(go version)",
+      "Exec(gofmt)",
+      "Exec(go mod)",
+      "Exec(go build)",
+      "Exec(go test)",
+      "Exec(go vet)",
+      "Exec(sed)",
+      "Exec(go env)",
+      "Exec(go doc)",
+      "Exec(go list)",
+      "Exec(node)",
+      "Exec(true)",
+      "Exec(/tmp/mcmodlist-cli)",
+      "Exec(cmake)",
+      "Exec(command)",
+      "Exec(find)",
+      "Exec(pkg-config)",
+      "Exec(ls)",
+      "Exec(mkdir)",
+      "Exec(cp)"
+    ]
+  }
+}

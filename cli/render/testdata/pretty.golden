@@ -1,0 +1,13 @@
+Instance: Test Instance
+Minecraft: 1.20.1
+Loader: Fabric 0.15.0
+Loader counts: Fabric(1) Fabric/Connector(1)
+Total: 4
+
+Name                          ID                        Version         Authors                   Jar                             Loader              Side      Status
+Fabric Mod                    fabric-mod                1.0.0           Alice, Bob                fabric.jar                      Fabric              -         enabled
+Connector Forge               forge-mod                 2.0.0           Carol                     forge.jar                       Fabric/Connector    -         enabled
+Old Forge                     old-forge                 0.1.0                                     old.jar.disabled                Forge               -         disabled
+mystery.jar (unrecognised)                              unknown                                   mystery.jar                     -                   -         unrecognised
+
+Note: loader counts exclude 1 disabled mod(s) and 1 unrecognised jar(s).

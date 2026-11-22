@@ -1,0 +1,85 @@
+# Maintainer: spring <spring@localhost>
+# NOTE: sha256sums below is a placeholder until the v0.1.0 tag exists on the
+# remote; run `updpkgsums` after tagging.
+pkgbase=mcmodlist
+pkgname=('mcmodlist' 'mcmodlist-gui')
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Inspect Minecraft instances and list their mods (CLI + Qt 6 GUI)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/spring-knight3/mcmodlist"
+license=('GPL-3.0-only')
+# CGO is enabled so -linkmode external can honour LDFLAGS (PIE + hardening).
+depends=('glibc')
+makedepends=('go' 'gcc' 'cmake' 'qt6-base' 'ninja')
+source=("https://github.com/spring-knight3/mcmodlist/archive/refs/tags/v${pkgver}.tar.gz")
+# PLACEHOLDER: regenerate with `updpkgsums` once a real tarball exists.
+sha256sums=('0000000000000000000000000000000000000000000000000000000000000000')
+
+prepare() {
+    cd "$pkgbase-$pkgver"
+    export GOFLAGS="-modcacherw"
+    go mod download -x
+}
+
+build() {
+    cd "$pkgbase-$pkgver"
+
+    # CLI
+    CGO_ENABLED=1 \
+    CGO_CPPFLAGS="${CPPFLAGS}" \
+    CGO_CFLAGS="${CFLAGS}" \
+    CGO_CXXFLAGS="${CXXFLAGS}" \
+    CGO_LDFLAGS="${LDFLAGS}" \
+    GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw" \
+        go build -ldflags "-linkmode external -extldflags \"${LDFLAGS}\" -X mcmodlist/cli.Version=${pkgver}" \
+        -o mcmodlist ./cmd/mcmodlist
+
+    # Engine (JSON-Lines backend for the GUI)
+    CGO_ENABLED=1 \
+    CGO_CPPFLAGS="${CPPFLAGS}" \
+    CGO_CFLAGS="${CFLAGS}" \
+    CGO_CXXFLAGS="${CXXFLAGS}" \
+    CGO_LDFLAGS="${LDFLAGS}" \
+    GOFLAGS="-buildmode=pie -trimpath -mod=readonly -modcacherw" \
+        go build -ldflags "-linkmode external -extldflags \"${LDFLAGS}\" -X mcmodlist/engine.EngineVersion=${pkgver}" \
+        -o mcmodlist-engine ./cmd/mcmodlist-engine
+
+    # Qt 6 GUI
+    cmake -S qtgui -B build/qtgui \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -GNinja
+    cmake --build build/qtgui -j"$(nproc)"
+}
+
+check() {
+    cd "$pkgbase-$pkgver"
+    go test ./core/... ./cli/...
+}
+
+package_mcmodlist() {
+    optdepends+=('mcmodlist-gui: graphical interface')
+    cd "$pkgbase-$pkgver"
+    install -Dm755 mcmodlist "$pkgdir/usr/bin/mcmodlist"
+
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+    ./mcmodlist completion bash >"$pkgdir/usr/share/bash-completion/completions/mcmodlist"
+    ./mcmodlist completion zsh >"$pkgdir/usr/share/zsh/site-functions/_mcmodlist"
+    ./mcmodlist completion fish >"$pkgdir/usr/share/fish/vendor_completions.d/mcmodlist.fish"
+}
+
+package_mcmodlist-gui() {
+    # Qt 6 Widgets runtime lives in qt6-base on Arch.
+    depends+=('qt6-base')
+    cd "$pkgbase-$pkgver"
+    # EngineLocator finds mcmodlist-engine next to the GUI executable.
+    install -Dm755 build/qtgui/mcmodlist-gui "$pkgdir/usr/bin/mcmodlist-gui"
+    install -Dm755 mcmodlist-engine "$pkgdir/usr/bin/mcmodlist-engine"
+
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 docs/PROTOCOL.md "$pkgdir/usr/share/doc/$pkgname/PROTOCOL.md"
+}

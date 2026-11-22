@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - name: go vet
+        run: go vet ./...
+      - name: go build
+        run: go build ./...
+      - name: go test
+        run: go test ./... -race
+      - name: CLI has no GUI deps
+        run: |
+          test -z "$(go list -deps ./cmd/mcmodlist | grep -E 'wails|fyne|qt' || true)"
+          test -z "$(go list -deps ./engine | grep mcmodlist/ | grep -vE 'mcmodlist/(core|engine)' || true)"
+
+  qt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install Qt 6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev libqt6test6-dev libqt6concurrent6-dev
+      - name: Build engine
+        run: go build -o build/mcmodlist-engine ./cmd/mcmodlist-engine
+      - name: Configure Qt
+        run: cmake -S qtgui -B build/qtgui -DCMAKE_BUILD_TYPE=Release
+      - name: Build Qt
+        run: cmake --build build/qtgui -j
+      - name: Qt tests (offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+          MCMODLIST_ENGINE: ${{ github.workspace }}/build/mcmodlist-engine
+        run: ctest --test-dir build/qtgui --output-on-failure
+      - name: Qt color grep (must be empty)
+        run: |
+          ! grep -RInE '#[0-9a-fA-F]{3,8}\b|QColor\(\s*[0-9]|QColor\(\s*"|Qt::(red|green|blue|black|white|gray|grey|yellow|cyan|magenta|dark|light)|QRgb|setStyleSheet\([^)]*(color|background)' qtgui/src
+      - name: Qt model grep (must be empty)
+        run: '! grep -RInE "QSortFilterProxyModel|std::sort" qtgui/src/model'

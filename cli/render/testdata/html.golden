@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mcmodlist</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:2rem;color:#1b1b1b;background:#fff}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:.35rem .5rem;text-align:left;vertical-align:top}
+th{background:#f3f3f3}
+.status-disabled{color:#8a4b00}.status-nested{color:#555}.status-unrecognised{color:#9b0000}
+.note{color:#555}
+</style>
+</head>
+<body>
+<h1>mcmodlist</h1>
+<dl>
+<dt>Instance</dt><dd>Test Instance</dd>
+<dt>Minecraft</dt><dd>1.20.1</dd>
+<dt>Loader</dt><dd>Fabric 0.15.0</dd>
+<dt>Loader counts</dt><dd>Fabric(1) Fabric/Connector(1)</dd>
+<dt>Total</dt><dd>4</dd>
+</dl>
+<table>
+<thead><tr><th>Name</th><th>ID</th><th>Version</th><th>Authors</th><th>Jar</th><th>Loader</th><th>Side</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Fabric Mod</td><td>fabric-mod</td><td>1.0.0</td><td>Alice, Bob</td><td>fabric.jar</td><td>Fabric</td><td>-</td><td class="status-enabled">enabled</td></tr>
+<tr><td>Connector Forge</td><td>forge-mod</td><td>2.0.0</td><td>Carol</td><td>forge.jar</td><td>Fabric/Connector</td><td>-</td><td class="status-enabled">enabled</td></tr>
+<tr><td>Old Forge</td><td>old-forge</td><td>0.1.0</td><td></td><td>old.jar.disabled</td><td>Forge</td><td>-</td><td class="status-disabled">disabled</td></tr>
+<tr><td>mystery.jar (unrecognised)</td><td></td><td>unknown</td><td></td><td>mystery.jar</td><td>-</td><td>-</td><td class="status-unrecognised">unrecognised</td></tr>
+</tbody>
+</table>
+<p class="note">Note: loader counts exclude 1 disabled mod(s) and 1 unrecognised jar(s).</p>
+</body>
+</html>
