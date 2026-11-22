@@ -10,8 +10,10 @@ Two PKGBUILDs live here:
   binaries from the latest git HEAD (`pkgver()` derives from
   `git describe`).
 
-> **NOTE:** `PKGBUILD`'s `sha256sums` is still a placeholder until the
-> `v0.1.0` tag exists on the remote; run `updpkgsums` after tagging.
+> **NOTE:** `PKGBUILD`'s `source` is the rolling `mcmodlist-release.tar.gz`
+> asset on the GitHub "latest" release (the version is in the release title,
+> not the asset name). `sha256sums` is a placeholder until that asset exists;
+> run `updpkgsums` after the first release is published.
 
 ## Build locally
 

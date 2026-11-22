@@ -1,6 +1,8 @@
 # Maintainer: spring <spring@localhost>
-# NOTE: sha256sums below is a placeholder until the v0.1.0 tag exists on the
-# remote; run `updpkgsums` after tagging.
+# Source is the rolling release asset `mcmodlist-release.tar.gz` attached to
+# the GitHub "latest" release (version lives in the release title, not the
+# asset name). `sha256sums` is a placeholder until that asset exists; run
+# `updpkgsums` after the first release is published.
 pkgbase=mcmodlist
 pkgname=('mcmodlist' 'mcmodlist-gui')
 pkgver=0.1.0
@@ -12,8 +14,8 @@ license=('GPL-3.0-only')
 # CGO is enabled so -linkmode external can honour LDFLAGS (PIE + hardening).
 depends=('glibc')
 makedepends=('go' 'gcc' 'cmake' 'qt6-base' 'ninja')
-source=("https://github.com/spring-knight3/mcmodlist/archive/refs/tags/v${pkgver}.tar.gz")
-# PLACEHOLDER: regenerate with `updpkgsums` once a real tarball exists.
+source=("https://github.com/spring-knight3/mcmodlist/releases/latest/download/mcmodlist-release.tar.gz")
+# PLACEHOLDER: regenerate with `updpkgsums` once the release asset exists.
 sha256sums=('0000000000000000000000000000000000000000000000000000000000000000')
 
 prepare() {
