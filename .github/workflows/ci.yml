@@ -33,9 +33,11 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Install Qt 6
+        # qt6-base-dev ships dev files + CMake configs for Widgets, Test, and
+        # Concurrent (all part of qtbase); there are no separate -dev packages.
         run: |
           sudo apt-get update
-          sudo apt-get install -y qt6-base-dev libqt6test6-dev libqt6concurrent6-dev
+          sudo apt-get install -y qt6-base-dev
       - name: Build engine
         run: go build -o build/mcmodlist-engine ./cmd/mcmodlist-engine
       - name: Configure Qt
