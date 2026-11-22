@@ -2,7 +2,10 @@ name: ci
 
 on:
   push:
+    tags:
+      - 'v*'
   pull_request:
+  workflow_dispatch:
 
 jobs:
   go:
@@ -54,3 +57,36 @@ jobs:
           ! grep -RInE '#[0-9a-fA-F]{3,8}\b|QColor\(\s*[0-9]|QColor\(\s*"|Qt::(red|green|blue|black|white|gray|grey|yellow|cyan|magenta|dark|light)|QRgb|setStyleSheet\([^)]*(color|background)' qtgui/src
       - name: Qt model grep (must be empty)
         run: '! grep -RInE "QSortFilterProxyModel|std::sort" qtgui/src/model'
+
+  release:
+    # Publishes mcmodlist-release.tar.gz on a GitHub release. Runs only for
+    # v* tags or manual dispatch; the release title carries the version.
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    needs: [go, qt]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source tarball
+        # Fixed top-level dir `mcmodlist/` — PKGBUILD cds into it. Asset name
+        # is version-independent; the version lives in the release title.
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          [ "$VERSION" = "$GITHUB_REF_NAME" ] && VERSION="$(git describe --tags --always)"
+          git archive --format=tar.gz --prefix=mcmodlist/ \
+              --output=mcmodlist-release.tar.gz HEAD
+          echo "MCMODLIST_RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="$GITHUB_REF_NAME"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="v${MCMODLIST_RELEASE_VERSION}"
+            git tag "$TAG" || true
+            git push origin "$TAG" || true
+          fi
+          gh release create "$TAG" mcmodlist-release.tar.gz \
+              --title "mcmodlist ${TAG#v}" \
+              --generate-notes

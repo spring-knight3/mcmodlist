@@ -32,10 +32,17 @@ extra-x86_64-build -r /var/cache/pacman/pkg/
 
 ## Cutting a release
 
-1. Tag the release (`git tag vX.Y.Z`) and push.
-2. In `packaging/arch/PKGBUILD`: bump `pkgver`, fix `url=`/`source=` to the
-   real repository, then run `updpkgsums`.
-3. Regenerate `.SRCINFO`:
+Releases are published by GitHub Actions (`.github/workflows/ci.yml`):
+
+1. Push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z` (or run the
+   workflow manually via *Actions → ci → Run workflow*).
+2. After the `go` and `qt` jobs pass, the `release` job archives the source
+   as `mcmodlist-release.tar.gz` (fixed top-level dir `mcmodlist/`) and
+   creates a GitHub release titled `mcmodlist X.Y.Z` with that asset.
+3. `PKGBUILD`'s `source` always points at
+   `releases/latest/download/mcmodlist-release.tar.gz`, so it never needs a
+   per-version URL. Bump `pkgver` in `PKGBUILD` to match, then run
+   `updpkgsums` and regenerate `.SRCINFO`:
 
    ```sh
    makepkg --printsrcinfo > .SRCINFO
